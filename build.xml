@@ -1,0 +1,31 @@
+<project name="admin" default="compile">
+
+    <target name="compile">
+        <echo>HELLO ANT</echo>
+        <mkdir dir="jar"/>
+
+        <javac destdir="jar">
+            <src path="src"/>
+        </javac>
+    </target>
+
+    <target name="clear">
+        <delete dir="jar"/>
+        <echo>DELETE JAR</echo>
+    </target>
+
+    <target name="jar" depends="clear, compile">
+        <jar destfile="jar/util.jar">
+            <fileset dir="jar">
+                <include name="*.class"/>
+            </fileset>
+            <manifest>
+                <attribute name="Main-Class" value="Main"/>
+            </manifest>
+        </jar>
+    </target>
+
+</project>
+
+
+    <!--com.builders.admin.AdminEntryPoint-->
