@@ -1,0 +1,16 @@
+<ivy-module version="1.0">
+    <info 
+        organisation="com.builders"
+        module="web"
+        status="integration"/>
+    <configurations>
+        <conf name="base" description="required for both compile and runtime" />
+        <conf name="compile" extends="base" />
+    </configurations>
+    <dependencies>
+        <dependency org="javax.servlet" name="javax.servlet-api"
+                    rev="3.0.1" transitive="false" conf="compile->default" />
+        <dependency name="utils" rev="latest.integration" conf="compile->default" />
+        <dependency name="services" rev="latest.integration" conf="compile->default" />
+    </dependencies>
+</ivy-module>

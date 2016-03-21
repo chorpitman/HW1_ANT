@@ -1,0 +1,6 @@
+<ivy-module version="1.0">
+    <info 
+        organisation="com.builders"
+        module="utils"
+        status="integration"/>
+</ivy-module>

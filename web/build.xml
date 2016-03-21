@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="web" default="default">
+    <property file="tmp.properties" />
+
+    <property name="module" value="web"/>
+
+    <condition property="web_module">
+        <equals arg1="${module}" arg2="web"/>
+    </condition>
+
+    <import file="../build-common.xml"/>
+</project>

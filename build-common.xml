@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="build-common" default="dist" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:if="ant:if" xmlns:unless="ant:unless">
+    <import file="dependencies.xml"/>
+
+    <property file="./build.properties"/>
+    <property name="version" value="1.0"/>
+
+    <path id="lib.path.id">
+        <fileset dir="${lib.dir}" />
+    </path>
+
+    <target name="clean-lib" description="--> clean the project libraries directory (dependencies)">
+        <echo message="delete lib dir: ${lib.dir}" />
+        <delete includeemptydirs="true" dir="${lib.dir}"/>
+        <ivy:cleancache />
+    </target>
+
+    <target name="clean" depends="clean-lib" description="Deletes files created during the build">
+        <echo message="delete build dir: ${build.dir}" />
+        <delete includeemptydirs="true" dir="${build.dir}"/>
+        <delete dir="${war.dir}"/>
+    </target>
+
+    <target name="resolve" depends="clean-lib" description="--> resolve and retrieve dependencies with ivy">
+        <mkdir dir="${lib.dir}"/> <!-- not usually necessary, ivy creates the directory IF there are dependencies -->
+
+        <!-- the call to resolve is not mandatory, retrieve makes an implicit call if we don't -->
+        <ivy:resolve file="${ivy.file}"/>
+        <ivy:retrieve pattern="${lib.dir}/[artifact].[ext]" />
+    </target>
+
+    <target name="compile" depends="resolve" description="Compiles source code">
+        <echo message="${ant.project.name} - build-common.compile"/>
+        <mkdir dir="${classes.dir}" />
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="lib.path.id" debug="true" includeAntRuntime="false"/>
+        <copy todir="${classes.dir}">
+            <fileset dir="${res.dir}"/>
+        </copy>
+    </target>
+
+    <condition property="common">
+        <not>
+            <or>
+                <equals arg1="${module}" arg2="admin" />
+                <equals arg1="${module}" arg2="web" />
+            </or>
+        </not>
+    </condition>
+
+    <target name="pack_common" if="common">
+        <jar destfile="${jar.file}">
+            <fileset dir="${classes.dir}"/>
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Build-Version" value="${version}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="pack_admin" if="admin_module">
+        <antcall target="unpack">
+            <param name="jar_file" value="${lib.dir}/utils.jar"/>
+        </antcall>
+        <antcall target="unpack">
+            <param name="jar_file" value="${lib.dir}/services.jar"/>
+        </antcall>
+
+        <jar destfile="${jar.file}">
+            <fileset dir="${classes.dir}"/>
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Build-Version" value="${version}"/>
+                <attribute name="Main-Class" value="${main.class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="unpack">
+        <unzip src="${jar_file}" dest="${classes.dir}">
+            <patternset>
+                <include name="**/*.class"/>
+                <include name="**/*.properties"/>
+            </patternset>
+        </unzip>
+    </target>
+
+    <target name="pack_web" if="web_module">
+
+        <mkdir dir="${war.dir}"/>
+
+        <war destfile="${war.dir}/web.war" webxml="${web-inf.dir}/web.xml">
+            <fileset dir="${webapp.dir}">
+                <include name="**/*.jsp"/>
+            </fileset>
+
+            <lib dir="${lib.dir}">
+                <exclude name="javax.servlet-api.jar"/>
+            </lib>
+            <classes dir="${classes.dir}"/>
+        </war>
+    </target>
+
+
+    <target name="dist" depends="compile" description="Creates distributable">
+        <antcall target="pack_common"/>
+        <antcall target="pack_admin"/>
+        <antcall target="pack_web"/>
+        <antcall target="publish"/>
+    </target>
+
+    <target name="publish" unless="web_module">
+        <echo message="${ant.project.name} - build-common.dist"/>
+        <ivy:publish artifactspattern="${build.dir}/[artifact].[ext]"
+                     resolver="shared"
+                     pubrevision="${version}"
+                     status="release"/>
+    </target>
+
+    <target name="clean.dependencies" 
+            description="Deletes files created during the build (includes dependencies)">
+        <antcall target="depend.${ant.project.name}">
+            <param name="dependency.target" value="clean"/>
+        </antcall>
+    </target>
+
+    <target name="dist.dependencies"
+            description="Creates distributable (includes dependencies)">
+        <antcall target="depend.${ant.project.name}">
+            <param name="dependency.target" value="dist"/>
+        </antcall>
+    </target>
+</project>

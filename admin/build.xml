@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="admin" default="default">
+    <property file="tmp.properties" />
+
+    <property name="module" value="admin"/>
+
+    <condition property="admin_module">
+        <equals arg1="${module}" arg2="admin"/>
+    </condition>
+
+    <import file="../build-common.xml"/>
+
+</project>

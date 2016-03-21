@@ -1,31 +1,23 @@
-<project name="admin" default="compile">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="sample" default="dist">
+    <import file="dependencies.xml"/>
 
-    <target name="compile">
-        <echo>HELLO ANT</echo>
-        <mkdir dir="jar"/>
-
-        <javac destdir="jar">
-            <src path="src"/>
-        </javac>
+    <target name="clean" description="Deletes build files">
+        <antcall target="depend.all">
+            <param name="dependency.target" value="clean"/>
+        </antcall>
     </target>
 
-    <target name="clear">
-        <delete dir="jar"/>
-        <echo>DELETE JAR</echo>
+    <target name="compile" description="Compiles source code">
+        <antcall target="depend.all">
+            <param name="dependency.target" value="compile"/>
+        </antcall>
     </target>
 
-    <target name="jar" depends="clear, compile">
-        <jar destfile="jar/util.jar">
-            <fileset dir="jar">
-                <include name="*.class"/>
-            </fileset>
-            <manifest>
-                <attribute name="Main-Class" value="Main"/>
-            </manifest>
-        </jar>
+    <target name="dist" description="Creates distributable">
+        <antcall target="depend.all">
+            <param name="dependency.target" value="dist"/>
+        </antcall>
     </target>
 
 </project>
-
-
-    <!--com.builders.admin.AdminEntryPoint-->
